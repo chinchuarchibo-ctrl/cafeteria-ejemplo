@@ -28,7 +28,7 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          GEMINI_API_KEY: ${{ env.GEMINI_API_KEY || "AIzaSyAiKIvOZzXyQ_MkTr2xbqWOlO7ydKCKaSY" }}
+          GEMINI_API_KEY: ${{ env.GEMINI_API_KEY || "AIzaSyCXtiJTgxbeluZAOI85hlcBobgooaXjJHc" }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
