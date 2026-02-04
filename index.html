@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Café Algarrobo | Brisa y Elegancia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'azul-base': '#6A7FA6',
+              'blanco-piso': '#EDEDED',
+              'dorado-elegante': '#C9A24D',
+              'gris-texto': '#2B2E34',
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #EDEDED;
+            color: #2B2E34;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .hero-gradient {
+            background: linear-gradient(rgba(106, 127, 166, 0.6), rgba(106, 127, 166, 0.6)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=2073');
+            background-size: cover;
+            background-position: center;
+        }
+        .animate-fade-in { animation: fadeIn 1.5s ease-out; }
+        .animate-slide-up { animation: slideUp 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #EDEDED; }
+        ::-webkit-scrollbar-thumb { background: #6A7FA6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C9A24D; }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.4",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+        "react/": "https://esm.sh/react@^19.2.4/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.39.0"
+      }
+    }
+    </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-blanco-piso text-gris-texto">
+    <div id="root"></div>
+
+    <script type="module">
+        import React, { useState, useEffect } from 'react';
+        import ReactDOM from 'react-dom/client';
+        import { GoogleGenAI, Type } from "@google/genai";
+
+        // --- CONSTANTS ---
+        const MENU_ITEMS = [
+            { id: '1', name: 'Espresso Algarrobo', description: 'Mezcla especial con notas de chocolate amargo y brisa marina.', price: '$3.500', category: 'cafe' },
+            { id: '2', name: 'Flat White Terciopelo', description: 'Doble shot con leche micro-espumada a temperatura perfecta.', price: '$4.200', category: 'cafe' },
+            { id: '3', name: 'Torta Rústica de Algarroba', description: 'Húmeda, con nueces del valle y chocolate blanco.', price: '$5.500', category: 'reposteria' },
+            { id: '4', name: 'Alfajor de Autor', description: 'Tapas artesanales rellenas con dulce de leche de campo.', price: '$2.800', category: 'reposteria' },
+            { id: '5', name: 'Avocado Toast Costero', description: 'Masa madre, palta laminada y semillas tostadas al sol.', price: '$8.900', category: 'brunch' },
+            { id: '6', name: 'Bowl de Frutos del Maipo', description: 'Yogurt griego, granola artesanal y miel de ulmo.', price: '$7.200', category: 'brunch' },
+            { id: '7', name: 'Iced Latte Caramelo Salino', description: 'Café frío con jarabe artesanal y un toque de sal de Cáhuil.', price: '$4.800', category: 'especiales' },
+            { id: '8', name: 'Matcha Ceremonial', description: 'Grado premium batido tradicionalmente.', price: '$4.500', category: 'especiales' }
+        ];
+
+        // --- COMPONENTS ---
+
+        const Navbar = () => {
+            const [isScrolled, setIsScrolled] = useState(false);
+            useEffect(() => {
+                const handleScroll = () => setIsScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'bg-azul-base py-3 shadow-xl' : 'bg-transparent py-6'}`}>
+                    <div className="container mx-auto px-6 flex justify-between items-center">
+                        <div className="text-2xl font-serif font-bold text-white tracking-[0.2em]">
+                            ALGARROBO<span className="text-dorado-elegante">.</span>
+                        </div>
+                        <div className="hidden md:flex space-x-8 text-white uppercase text-[11px] tracking-[0.25em] font-medium">
+                            <a href="#hero" className="hover:text-dorado-elegante transition-colors">Inicio</a>
+                            <a href="#menu" className="hover:text-dorado-elegante transition-colors">Menú</a>
+                            <a href="#ai-barista" className="hover:text-dorado-elegante transition-colors">Barista IA</a>
+                            <a href="#about" className="hover:text-dorado-elegante transition-colors">Nosotros</a>
+                            <a href="#contact" className="hover:text-dorado-elegante transition-colors">Contacto</a>
+                        </div>
+                        <button className="bg-dorado-elegante text-white px-8 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-azul-base transition-all transform hover:scale-105">
+                            Reservar
+                        </button>
+                    </div>
+                </nav>
+            );
+        };
+
+        const MenuSection = () => {
+            const [filter, setFilter] = useState('all');
+            const filteredItems = filter === 'all' ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === filter);
+
+            return (
+                <section id="menu" className="py-24 bg-white">
+                    <div className="container mx-auto px-6">
+                        <div className="text-center mb-16">
+                            <span className="text-dorado-elegante uppercase tracking-[0.4em] text-xs font-bold">Experiencia Gastronómica</span>
+                            <h2 className="text-4xl md:text-5xl font-serif text-gris-texto mt-4 italic">Nuestra Carta</h2>
+                            <div className="w-16 h-px bg-dorado-elegante mx-auto mt-6"></div>
+                        </div>
+
+                        <div className="flex flex-wrap justify-center gap-4 mb-16">
+                            {['all', 'cafe', 'reposteria', 'brunch', 'especiales'].map((cat) => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setFilter(cat)}
+                                    className={`px-8 py-2 text-[10px] uppercase tracking-[0.2em] transition-all rounded-full border
+                                        ${filter === cat 
+                                          ? 'bg-azul-base text-white border-azul-base shadow-lg' 
+                                          : 'text-gris-texto border-gris-texto/10 hover:border-dorado-elegante hover:text-dorado-elegante'}`}
+                                >
+                                    {cat === 'all' ? 'Todo' : cat.replace('reposteria', 'repostería')}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-20 gap-y-12 max-w-6xl mx-auto">
+                            {filteredItems.map((item) => (
+                                <div key={item.id} className="group cursor-default">
+                                    <div className="flex justify-between items-baseline mb-2">
+                                        <h3 className="text-lg font-serif text-gris-texto group-hover:text-dorado-elegante transition-colors duration-300">
+                                            {item.name}
+                                        </h3>
+                                        <div className="flex-grow border-b border-dotted border-gris-texto/10 mx-4 h-1"></div>
+                                        <span className="text-md font-medium text-gris-texto/80">{item.price}</span>
+                                    </div>
+                                    <p className="text-[13px] text-gris-texto/60 italic leading-relaxed max-w-md">
+                                        {item.description}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const AIBarista = () => {
+            const [mood, setMood] = useState('');
+            const [pref, setPref] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [result, setResult] = useState(null);
+
+            const handleRecommend = async (e) => {
+                e.preventDefault();
+                if (!mood || !pref) return;
+                setLoading(true);
+                try {
+                    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-3-flash-preview',
+                        contents: `Soy un cliente en "Café Algarrobo", Valparaíso. Me siento ${mood} y prefiero sabores ${pref}. Recomiéndame un café y algo para comer.`,
+                        config: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    drink: { type: Type.STRING },
+                                    pairing: { type: Type.STRING },
+                                    description: { type: Type.STRING }
+                                },
+                                required: ["drink", "pairing", "description"]
+                            }
+                        }
+                    });
+                    setResult(JSON.parse(response.text));
+                } catch (err) {
+                    console.error(err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <section id="ai-barista" className="py-24 bg-azul-base text-white overflow-hidden relative">
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="max-w-5xl mx-auto">
+                            <div className="flex flex-col lg:flex-row items-center gap-16">
+                                <div className="w-full lg:w-1/2">
+                                    <span className="text-dorado-elegante uppercase tracking-[0.4em] text-xs font-bold">Sugerencia Inteligente</span>
+                                    <h2 className="text-4xl md:text-5xl font-serif mt-4 italic">Concierge de Autor</h2>
+                                    <p className="mt-8 text-white/70 leading-relaxed text-sm">
+                                        Descubra el maridaje ideal diseñado por nuestra IA para armonizar con la brisa de Algarrobo.
+                                    </p>
+                                    <form onSubmit={handleRecommend} className="mt-10 space-y-6">
+                                        <div className="group">
+                                            <label className="block text-[10px] uppercase tracking-[0.2em] text-dorado-elegante mb-3">¿Cómo se siente hoy?</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-white/5 border-b border-white/20 p-4 text-sm focus:outline-none focus:border-dorado-elegante transition-all"
+                                                value={mood}
+                                                onChange={(e) => setMood(e.target.value)}
+                                                placeholder="Ej: Contemplativo, enérgico..."
+                                            />
+                                        </div>
+                                        <div className="group">
+                                            <label className="block text-[10px] uppercase tracking-[0.2em] text-dorado-elegante mb-3">Notas preferidas</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-white/5 border-b border-white/20 p-4 text-sm focus:outline-none focus:border-dorado-elegante transition-all"
+                                                value={pref}
+                                                onChange={(e) => setPref(e.target.value)}
+                                                placeholder="Ej: Dulce, intenso, frutal..."
+                                            />
+                                        </div>
+                                        <button type="submit" disabled={loading} className="w-full bg-dorado-elegante text-white py-4 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-white hover:text-azul-base transition-all disabled:opacity-50">
+                                            {loading ? 'Consultando...' : 'Obtener Recomendación'}
+                                        </button>
+                                    </form>
+                                </div>
+                                <div className="w-full lg:w-1/2 min-h-[350px] flex items-center justify-center border border-white/10 rounded-2xl bg-white/[0.02] p-10 backdrop-blur-sm">
+                                    {loading ? (
+                                        <div className="animate-spin w-12 h-12 border-2 border-dorado-elegante border-t-transparent rounded-full"></div>
+                                    ) : result ? (
+                                        <div className="text-center animate-fade-in">
+                                            <h3 className="text-2xl font-serif italic mb-2">{result.drink}</h3>
+                                            <p className="text-dorado-elegante uppercase tracking-widest text-xs mb-4">+ {result.pairing}</p>
+                                            <p className="text-sm italic text-white/80 leading-relaxed">"{result.description}"</p>
+                                            <button onClick={() => setResult(null)} className="mt-8 text-[10px] uppercase tracking-widest text-dorado-elegante underline">Otra consulta</button>
+                                        </div>
+                                    ) : (
+                                        <p className="text-white/30 italic text-sm">Complete el formulario para su recomendación personalizada.</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const App = () => (
+            <div className="min-h-screen">
+                <Navbar />
+                
+                <section id="hero" className="hero-gradient h-screen flex items-center justify-center text-center text-white relative">
+                    <div className="absolute inset-0 bg-azul-base/40"></div>
+                    <div className="relative z-10 px-6 max-w-4xl">
+                        <span className="uppercase tracking-[0.6em] text-[10px] mb-6 block opacity-80 animate-fade-in">Algarrobo · Valparaíso · Chile</span>
+                        <h1 className="text-7xl md:text-9xl font-serif mb-8 leading-tight italic animate-slide-up">
+                            Café <span className="text-dorado-elegante">Algarrobo</span>
+                        </h1>
+                        <p className="text-lg md:text-xl font-light italic mb-12 text-white/90 tracking-[0.1em]">
+                            La elegancia de la brisa marina fusionada con el tueste artesanal.
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                            <a href="#menu" className="bg-dorado-elegante text-white px-12 py-4 rounded-full text-[11px] font-bold uppercase tracking-[0.25em] hover:bg-white hover:text-azul-base transition-all shadow-xl">
+                                Explorar Menú
+                            </a>
+                            <a href="#ai-barista" className="bg-white/10 backdrop-blur-md border border-white/30 px-12 py-4 rounded-full text-[11px] font-bold uppercase tracking-[0.25em] hover:bg-white hover:text-azul-base transition-all">
+                                Asistente IA
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="about" className="py-24 bg-white overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col lg:flex-row items-center gap-20">
+                            <div className="w-full lg:w-1/2 relative">
+                                <div className="absolute -top-10 -left-10 w-full h-full bg-blanco-piso -z-10 rounded-2xl"></div>
+                                <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=1000" className="rounded-2xl shadow-xl h-[450px] w-full object-cover" />
+                                <div className="absolute -bottom-8 -right-8 bg-azul-base p-10 text-white rounded-2xl shadow-2xl">
+                                    <p className="text-5xl font-serif italic text-dorado-elegante">Chile</p>
+                                    <p className="text-[10px] uppercase tracking-[0.3em] font-bold mt-2 opacity-60">Litoral Central</p>
+                                </div>
+                            </div>
+                            <div className="w-full lg:w-1/2">
+                                <span className="text-dorado-elegante uppercase tracking-[0.4em] text-xs font-bold">Nuestra Esencia</span>
+                                <h2 className="text-4xl md:text-6xl font-serif text-gris-texto mt-6 mb-10 italic leading-tight">Serenidad frente al Pacífico</h2>
+                                <p className="text-gris-texto/70 leading-relaxed text-lg mb-8">
+                                    Ubicado en la emblemática comuna de Algarrobo, nuestro café nace como un refugio de sofisticación. El azul de Valparaíso se mezcla con la mística del algarrobo para crear un espacio eterno.
+                                </p>
+                                <div className="flex items-center gap-6 text-dorado-elegante">
+                                    <div className="h-[2px] w-12 bg-dorado-elegante"></div>
+                                    <p className="text-[14px] font-medium uppercase tracking-[0.2em] text-gris-texto">Tradición · Innovación · Mar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <MenuSection />
+                <AIBarista />
+
+                <footer id="contact" className="bg-azul-base text-white pt-24 pb-12">
+                    <div className="container mx-auto px-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+                            <div>
+                                <h3 className="text-2xl font-serif font-bold text-white tracking-[0.2em] mb-8">ALGARROBO<span className="text-dorado-elegante">.</span></h3>
+                                <p className="text-[13px] text-white/60">Elegancia costera redefinida en cada grano de café.</p>
+                                <div className="flex space-x-6 mt-8">
+                                    <a href="#" className="text-white/40 hover:text-dorado-elegante transition-colors"><i className="fab fa-instagram text-xl"></i></a>
+                                    <a href="#" className="text-white/40 hover:text-dorado-elegante transition-colors"><i className="fab fa-facebook text-xl"></i></a>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="text-[10px] uppercase tracking-[0.3em] font-bold text-dorado-elegante mb-8">Ubicación</h4>
+                                <p className="text-sm text-white/80 leading-loose">Valparaíso, Algarrobo<br />Litoral Central, Chile</p>
+                            </div>
+                            <div>
+                                <h4 className="text-[10px] uppercase tracking-[0.3em] font-bold text-dorado-elegante mb-8">Horarios</h4>
+                                <ul className="text-sm text-white/60 space-y-3">
+                                    <li>Lun - Vie: 08:30 - 20:30</li>
+                                    <li>Sáb - Dom: 09:30 - 21:30</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="text-[10px] uppercase tracking-[0.3em] font-bold text-dorado-elegante mb-8">Newsletter</h4>
+                                <input type="email" placeholder="Su email" className="bg-white/5 border-b border-white/20 p-3 text-xs w-full focus:outline-none focus:border-dorado-elegante" />
+                            </div>
+                        </div>
+                        <div className="border-t border-white/5 pt-10 text-[9px] uppercase tracking-[0.3em] text-white/30 flex justify-between">
+                            <p>&copy; 2024 Café Algarrobo Chile.</p>
+                            <p>Valparaíso · Chile</p>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
