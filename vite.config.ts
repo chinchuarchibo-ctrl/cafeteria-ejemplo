@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()],
     define: {
-      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || "AIzaSyAiKIvOZzXyQ_MkTr2xbqWOlO7ydKCKaSY"),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || "AIzaSyAiKIvOZzXyQ_MkTr2xbqWOlO7ydKCKaSY")
+      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || "AIzaSyCXtiJTgxbeluZAOI85hlcBobgooaXjJHc"),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || "AIzaSyCXtiJTgxbeluZAOI85hlcBobgooaXjJHc")
     },
     resolve: {
       alias: {
